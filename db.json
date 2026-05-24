@@ -1,0 +1,12 @@
+{
+  "trilhas": [
+    {
+      "nome": "TypeScript",
+      "descricao": "TypScript para iniciantes ",
+      "nivel": "iniciante",
+      "duracao": 5,
+      "id": "NWcPLhEl2FA"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}
