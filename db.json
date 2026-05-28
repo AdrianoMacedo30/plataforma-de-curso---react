@@ -1,12 +1,14 @@
 {
-  "trilhas": [
-    {
-      "nome": "TypeScript",
-      "descricao": "TypScript para iniciantes ",
-      "nivel": "iniciante",
-      "duracao": 6,
-      "id": "NWcPLhEl2FA"
-    }
-  ],
-  "$schema": "./node_modules/json-server/schema.json"
+  "trilhas": [],
+  "cursos": [],
+  "categorias": [],
+  "usuarios": [],
+  "modulos": [],
+  "aulas": [],
+  "matriculas": [],
+  "progresso": [],
+  "certificados": [],
+  "planos": [],
+  "pagamentos": [],
+  "avaliacoes": []
 }
