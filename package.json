@@ -5,13 +5,13 @@
   "type": "module",
   "homepage": "https://adrianomacedo30.github.io/plataforma-de-curso---react/",
   "scripts": {
-  "dev": "vite",
-  "build": "vite build",
-  "deploy": "gh-pages -d dist"
-},
+    "dev": "vite",
+    "build": "vite build",
+    "serve:api": "json-server --watch db.json --port 4000",
+    "deploy": "gh-pages -d dist"
+  },
   "dependencies": {
     "bootstrap": "^5.3.8",
-    "bootstrap-icons": "^1.13.1",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-router-dom": "^7.15.0"
@@ -30,6 +30,7 @@
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.59.2",
     "vite": "^8.0.12",
-    "zod": "^4.4.3"
+    "zod": "^4.4.3",
+    "json-server": "^0.17.3"
   }
 }

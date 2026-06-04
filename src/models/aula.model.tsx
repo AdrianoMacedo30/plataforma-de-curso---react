@@ -4,21 +4,18 @@ export interface IAula {
     id?: string;
     moduloId: string;
     titulo: string;
-    tipo: 'video' | 'texto' | 'quiz' | string;
-    urlConteudo: string;
+    tipo: 'video' | 'texto' | 'quiz';
+    urlConteudo?: string;
     duracao: number;
     ordem: number;
 }
 
 export const aulaSchema = z.object({
     id: z.string().optional(),
-    moduloId: z.string().min(1, 'O módulo é obrigatório'),
-    titulo: z.string()
-        .min(1, 'O título é obrigatório')
-        .min(3, 'O título deve ter no mínimo 3 caracteres'),
+    moduloId: z.string().min(1, 'Selecione um módulo'),
+    titulo: z.string().min(1, 'O título é obrigatório').min(3, 'Mínimo 3 caracteres'),
     tipo: z.enum(['video', 'texto', 'quiz']),
-    urlConteudo: z.string()
-        .min(1, 'A URL do conteúdo é obrigatória'),
-    duracao: z.coerce.number().min(1, 'A duração deve ser de pelo menos 1 hora'),
-    ordem: z.coerce.number().min(1, 'A ordem deve ser maior que zero'),
+    urlConteudo: z.string().optional(),
+    duracao: z.coerce.number().min(0, 'Duração inválida'),
+    ordem: z.coerce.number().min(1, 'Ordem deve ser ao menos 1'),
 });

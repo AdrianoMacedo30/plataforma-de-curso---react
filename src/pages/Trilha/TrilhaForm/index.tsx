@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../../../components/Button";
 import { Input } from "../../../components/Input";
+import { categoriasService } from "../../../services/categoria.service";
+import type { ICategoria } from "../../../models/categoria.model";
 import type { ITrilha } from "../../../models/trilha.model";
 
 interface TrilhaFormProps {
@@ -11,10 +13,21 @@ interface TrilhaFormProps {
 }
 
 export const TrilhaForm = ({ trilha = null, onSave, onCancel, errors = {} }: TrilhaFormProps) => {
+    const [categorias, setCategorias] = useState<ICategoria[]>([]);
 
     const [trilhaState, setTrilhaState] = useState<ITrilha>(
-        trilha || { nome: '', descricao: '', nivel: 'iniciante', duracao: 0 }
+        trilha || { nome: '', descricao: '', nivel: 'iniciante', duracao: 0, categoriaId: '' }
     );
+
+    useEffect(() => {
+        (async () => {
+            try {
+                setCategorias(await categoriasService.findAll());
+            } catch {
+                setCategorias([]);
+            }
+        })();
+    }, []);
 
     return (
         <>
@@ -39,6 +52,27 @@ export const TrilhaForm = ({ trilha = null, onSave, onCancel, errors = {} }: Tri
                 onChange={(value) => setTrilhaState({ ...trilhaState, descricao: value })}
                 error={errors.descricao}
             />
+
+            <div className="d-grid mb-1">
+                <label htmlFor="categoriaId" className="form-label">Categoria</label>
+                <select
+                    id="categoriaId"
+                    className={`form-select mb-1 ${errors.categoriaId ? 'is-invalid' : ''}`}
+                    value={trilhaState.categoriaId}
+                    onChange={(e) =>
+                        setTrilhaState({ ...trilhaState, categoriaId: e.target.value })
+                    }
+                >
+                    <option value="">Selecione uma categoria</option>
+                    {categorias.map((categoria) => (
+                        <option key={categoria.id} value={categoria.id}>
+                            {categoria.nome}
+                        </option>
+                    ))}
+                </select>
+                {errors.categoriaId && <div className="invalid-feedback d-block mb-2">{errors.categoriaId}</div>}
+                {categorias.length === 0 && <div className="form-text">Cadastre uma categoria antes de criar trilhas.</div>}
+            </div>
 
             <div className="d-grid mb-1">
                 <label htmlFor="nivel" className="form-label">Nível</label>
@@ -80,6 +114,7 @@ export const TrilhaForm = ({ trilha = null, onSave, onCancel, errors = {} }: Tri
                     variant={trilhaState.id ? "warning" : "primary"}
                     type="button"
                     onClick={() => onSave(trilhaState)}
+                    disabled={categorias.length === 0}
                 />
             </div>
         </>

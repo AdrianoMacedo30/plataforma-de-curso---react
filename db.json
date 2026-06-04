@@ -1,14 +1,121 @@
 {
-  "trilhas": [],
-  "cursos": [],
-  "categorias": [],
-  "usuarios": [],
-  "modulos": [],
-  "aulas": [],
-  "matriculas": [],
-  "progresso": [],
-  "certificados": [],
-  "planos": [],
-  "pagamentos": [],
-  "avaliacoes": []
+  "categorias": [
+    {
+      "nome": "TypeScript",
+      "descricao": "",
+      "id": 1
+    }
+  ],
+  "trilhas": [
+    {
+      "nome": "TypeScript",
+      "descricao": "TypScript para iniciantes ",
+      "nivel": "intermediario",
+      "duracao": 4,
+      "categoriaId": "1",
+      "id": 1
+    }
+  ],
+  "cursos": [
+    {
+      "nome": "TypeScript",
+      "descricao": "TypScript para iniciantes ",
+      "nivel": "intermediario",
+      "duracao": 3,
+      "trilhaId": "1",
+      "categoriaId": "1",
+      "id": 1
+    }
+  ],
+  "modulos": [
+    {
+      "cursoId": "1",
+      "titulo": "INTRO",
+      "ordem": 1,
+      "id": 1
+    }
+  ],
+  "aulas": [
+    {
+      "moduloId": "1",
+      "titulo": "INTRO TS",
+      "tipo": "video",
+      "duracao": 3,
+      "ordem": 1,
+      "id": 1
+    }
+  ],
+  "usuarios": [
+    {
+      "nome": "Adriano ",
+      "email": "amercelho@gmail.com",
+      "senha": "75674567464",
+      "status": "ativo",
+      "createdAt": "2026-06-04",
+      "id": 1
+    }
+  ],
+  "matriculas": [
+    {
+      "usuarioId": "1",
+      "cursoId": "1",
+      "dataMatricula": "2026-06-04",
+      "concluido": false,
+      "id": 1
+    }
+  ],
+  "progresso": [
+    {
+      "usuarioId": "1",
+      "cursoId": "1",
+      "aulaId": "1",
+      "concluida": true,
+      "dataConclusao": "2026-06-04",
+      "id": 1
+    }
+  ],
+  "certificados": [
+    {
+      "usuarioId": "1",
+      "cursoId": "1",
+      "dataEmissao": "2026-06-04",
+      "id": 1
+    },
+    {
+      "usuarioId": "1",
+      "cursoId": "1",
+      "dataEmissao": "2026-06-04",
+      "id": 2
+    }
+  ],
+  "planos": [
+    {
+      "nome": "Mensal",
+      "descricao": "cobrado mensalmente ",
+      "preco": 150,
+      "duracao": 1,
+      "id": 1
+    }
+  ],
+  "pagamentos": [
+    {
+      "usuarioId": "1",
+      "planoId": "1",
+      "metodoPagamento": "pix",
+      "valor": 150,
+      "transacao": "TXN-1780535477288",
+      "data": "2026-06-04",
+      "id": 1
+    }
+  ],
+  "avaliacoes": [
+    {
+      "usuarioId": "1",
+      "cursoId": "1",
+      "nota": 5,
+      "comentario": "",
+      "data": "2026-06-04",
+      "id": 1
+    }
+  ]
 }

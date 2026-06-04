@@ -35,9 +35,6 @@ export const AulasForm = ({ form, modulos, onChange, onSave, errors = {} }: Aula
                     <option value="quiz">Quiz</option>
                 </select>
             </div>
-            <Input label="URL do Conteúdo" id="urlConteudo" type="text" visible="true"
-                placeholder="https://..." value={form.urlConteudo}
-                onChange={v => onChange({ ...form, urlConteudo: v })} error={errors.urlConteudo} />
             <div className="row g-2">
                 <div className="col-6">
                     <Input label="Duração (min)" id="duracao" type="number" visible="true"

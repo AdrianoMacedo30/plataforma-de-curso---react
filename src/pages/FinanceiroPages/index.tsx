@@ -9,7 +9,10 @@ import { PlanoTable } from "./PlanoTable";
 import { PagamentoForm } from "./PagamentoForm";
 import { PagamentoTable } from "./PagamentoTable";
 
+type Aba = 'planos' | 'checkout' | 'historico';
+
 export const FinanceiroPages = () => {
+    const [abaAtiva, setAbaAtiva] = useState<Aba>('planos');
     const [planos, setPlanos] = useState<IPlano[]>([]);
     const [pagamentos, setPagamentos] = useState<IPagamento[]>([]);
     const [usuarios, setUsuarios] = useState<IUsuario[]>([]);
@@ -42,7 +45,8 @@ export const FinanceiroPages = () => {
         try {
             await planosService.create(formPlano);
             exibirMsg('success', 'Plano adicionado!');
-            setFormPlano({ nome: '', descricao: '', preco: 0, duracao: 1 }); await carregar();
+            setFormPlano({ nome: '', descricao: '', preco: 0, duracao: 1 });
+            await carregar();
         } catch { exibirMsg('danger', 'Erro ao salvar plano.'); }
     };
 
@@ -61,34 +65,91 @@ export const FinanceiroPages = () => {
                 transacao: `TXN-${Date.now()}`,
                 data: new Date().toISOString().slice(0, 10),
             });
-            exibirMsg('success', 'Pagamento registrado com sucesso!');
-            setFormPag({ usuarioId: '', planoId: '', metodoPagamento: 'cartao_credito', valor: 0 }); await carregar();
+            exibirMsg('success', 'Pagamento registrado!');
+            setFormPag({ usuarioId: '', planoId: '', metodoPagamento: 'cartao_credito', valor: 0 });
+            await carregar(); setAbaAtiva('historico');
         } catch { exibirMsg('danger', 'Erro ao processar pagamento.'); }
     };
 
+    const receitaTotal = pagamentos.reduce((acc, p) => acc + Number(p.valor || 0), 0);
+
     return (
-        <div className="container mt-4">
-            <h4 className="mb-4">Módulo Financeiro</h4>
+        <div className="container-fluid mt-2">
+            <div className="mb-4">
+                <h4 className="mb-0">Módulo Financeiro</h4>
+                <small className="text-muted">Gerencie planos e pagamentos</small>
+            </div>
+
             {mensagem && <div className={`alert alert-${mensagem.tipo} mb-3`}>{mensagem.texto}</div>}
-            <div className="row g-4">
-                <div className="col-12 col-lg-5">
-                    <div className="card p-3 mb-3">
-                        <h6 className="mb-3">Planos Disponíveis</h6>
-                        <PlanoForm form={formPlano} onChange={setFormPlano} onSave={handleSavePlano} errors={errorsP} />
+
+            {/* Cards de resumo — sem borda colorida no topo */}
+            <div className="row g-3 mb-4">
+                {[
+                    { value: planos.length,          label: 'Planos ativos' },
+                    { value: pagamentos.length,       label: 'Pagamentos' },
+                    { value: `R$ ${receitaTotal.toFixed(2)}`, label: 'Receita total' },
+                    {
+                        value: pagamentos.length > 0
+                            ? `R$ ${(receitaTotal / pagamentos.length).toFixed(2)}`
+                            : 'R$ 0,00',
+                        label: 'Ticket médio',
+                    },
+                ].map(card => (
+                    <div className="col-6 col-md-3" key={card.label}>
+                        <div className="card p-3 text-center">
+                            <div className="fs-3 fw-bold">{card.value}</div>
+                            <div className="text-muted small">{card.label}</div>
+                        </div>
                     </div>
-                    <PlanoTable planos={planos} onDelete={handleDeletePlano} />
-                </div>
-                <div className="col-12 col-lg-7">
-                    <div className="card p-3 mb-3">
-                        <h6 className="mb-3">Checkout — Simular Assinatura</h6>
-                        <PagamentoForm form={formPag} usuarios={usuarios} planos={planos}
-                            onChange={setFormPag} onSave={handlePagamento} />
-                    </div>
-                    <div className="card p-3">
+                ))}
+            </div>
+
+            {/* Abas — sem ícones */}
+            <ul className="nav nav-tabs mb-3">
+                {([
+                    { key: 'planos',    label: 'Planos' },
+                    { key: 'checkout',  label: 'Checkout' },
+                    { key: 'historico', label: 'Histórico' },
+                ] as { key: Aba; label: string }[]).map(aba => (
+                    <li className="nav-item" key={aba.key}>
+                        <button
+                            className={`nav-link ${abaAtiva === aba.key ? 'active' : ''}`}
+                            onClick={() => setAbaAtiva(aba.key)}
+                        >
+                            {aba.label}
+                        </button>
+                    </li>
+                ))}
+            </ul>
+
+            <div className="card p-4">
+                {abaAtiva === 'planos' && (
+                    <>
+                        <h6 className="mb-3">Adicionar Plano</h6>
+                        <div style={{ maxWidth: '480px' }} className="mb-4">
+                            <PlanoForm form={formPlano} onChange={setFormPlano}
+                                onSave={handleSavePlano} errors={errorsP} />
+                        </div>
+                        <hr />
+                        <h6 className="mb-3">Planos cadastrados</h6>
+                        <PlanoTable planos={planos} onDelete={handleDeletePlano} />
+                    </>
+                )}
+                {abaAtiva === 'checkout' && (
+                    <>
+                        <h6 className="mb-3">Simular Assinatura</h6>
+                        <div style={{ maxWidth: '480px' }}>
+                            <PagamentoForm form={formPag} usuarios={usuarios}
+                                planos={planos} onChange={setFormPag} onSave={handlePagamento} />
+                        </div>
+                    </>
+                )}
+                {abaAtiva === 'historico' && (
+                    <>
                         <h6 className="mb-3">Histórico de Pagamentos</h6>
                         <PagamentoTable pagamentos={pagamentos} usuarios={usuarios} planos={planos} />
-                    </div>
-                </div>
+                    </>
+                )}
             </div>
         </div>
     );

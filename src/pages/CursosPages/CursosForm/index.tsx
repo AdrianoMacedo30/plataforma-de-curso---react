@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../../../components/Button";
 import { Input } from "../../../components/Input";
+import { categoriasService } from "../../../services/categoria.service";
 import type { ICurso } from "../../../models/curso.model";
+import type { ICategoria } from "../../../models/categoria.model";
 import type { ITrilha } from "../../../models/trilha.model";
 
 interface CursoFormProps {
@@ -13,10 +15,21 @@ interface CursoFormProps {
 }
 
 export const CursoForm = ({ curso = null, trilhas, onSave, onCancel, errors = {} }: CursoFormProps) => {
+    const [categorias, setCategorias] = useState<ICategoria[]>([]);
 
     const [cursoState, setCursoState] = useState<ICurso>(() =>
-        (curso ?? { nome: '', descricao: '', nivel: 'iniciante', duracao: 0, trilhaId: '' }) as ICurso
+        (curso ?? { nome: '', descricao: '', nivel: 'iniciante', duracao: 0, trilhaId: '', categoriaId: '' }) as ICurso
     );
+
+    useEffect(() => {
+        (async () => {
+            try {
+                setCategorias(await categoriasService.findAll());
+            } catch {
+                setCategorias([]);
+            }
+        })();
+    }, []);
 
     return (
         <>
@@ -88,6 +101,25 @@ export const CursoForm = ({ curso = null, trilhas, onSave, onCancel, errors = {}
                 {errors.trilhaId && <div className="invalid-feedback d-block mb-2">{errors.trilhaId}</div>}
             </div>
 
+            <div className="d-grid mb-1">
+                <label htmlFor="categoriaId" className="form-label">Categoria</label>
+                <select
+                    id="categoriaId"
+                    className={`form-select mb-1 ${errors.categoriaId ? 'is-invalid' : ''}`}
+                    value={cursoState.categoriaId}
+                    onChange={(e) => setCursoState({ ...cursoState, categoriaId: e.target.value })}
+                >
+                    <option value="">Selecione uma categoria ...</option>
+                    {categorias.map((categoria) => (
+                        <option key={categoria.id} value={categoria.id}>
+                            {categoria.nome}
+                        </option>
+                    ))}
+                </select>
+                {errors.categoriaId && <div className="invalid-feedback d-block mb-2">{errors.categoriaId}</div>}
+                {categorias.length === 0 && <div className="form-text">Cadastre uma categoria antes de criar cursos.</div>}
+            </div>
+
             <div className="d-flex justify-content-end gap-2 mt-3">
                 <Button value="Cancelar" variant="secondary" type="button" onClick={onCancel} />
                 <Button
@@ -95,6 +127,7 @@ export const CursoForm = ({ curso = null, trilhas, onSave, onCancel, errors = {}
                     variant={cursoState.id ? "warning" : "primary"}
                     type="button"
                     onClick={() => onSave(cursoState)}
+                    disabled={categorias.length === 0}
                 />
             </div>
         </>

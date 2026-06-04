@@ -7,10 +7,13 @@ import type { IProgresso, ICertificado } from "../../models/progresso.model";
 import type { IUsuario } from "../../models/usuario.model";
 import type { ICurso } from "../../models/curso.model";
 import type { IAula } from "../../models/aula.model";
-import { ProgressoForm } from "./ProgressaoForm/index.tsx";
-import { ProgressoTable } from "./ProgressaoTable/index.tsx";
+import { ProgressoForm } from "./ProgressaoForm";
+import { ProgressoTable } from "./ProgressaoTable";
+
+type Aba = 'marcar' | 'certificado' | 'consultar';
 
 export const ProgressoPages = () => {
+    const [abaAtiva, setAbaAtiva] = useState<Aba>('consultar');
     const [usuarios, setUsuarios] = useState<IUsuario[]>([]);
     const [cursos, setCursos] = useState<ICurso[]>([]);
     const [aulas, setAulas] = useState<IAula[]>([]);
@@ -43,37 +46,118 @@ export const ProgressoPages = () => {
             exibirMsg('danger', 'Preencha todos os campos.'); return;
         }
         try {
-            await progressoService.create({ ...formP, concluida: true, dataConclusao: new Date().toISOString().slice(0,10) });
+            await progressoService.create({ ...formP, concluida: true, dataConclusao: new Date().toISOString().slice(0, 10) });
             exibirMsg('success', 'Aula marcada como concluída!');
-            setFormP({ usuarioId: '', cursoId: '', aulaId: '' }); await carregar();
+            setFormP({ usuarioId: '', cursoId: '', aulaId: '' });
+            await carregar(); setAbaAtiva('consultar');
         } catch { exibirMsg('danger', 'Erro ao salvar progresso.'); }
     };
 
     const handleEmitir = async () => {
         if (!formC.usuarioId || !formC.cursoId) { exibirMsg('danger', 'Preencha todos os campos.'); return; }
         try {
-            await certificadosService.create({ ...formC, dataEmissao: new Date().toISOString().slice(0,10) });
+            await certificadosService.create({ ...formC, dataEmissao: new Date().toISOString().slice(0, 10) });
             exibirMsg('success', 'Certificado emitido com sucesso!');
-            setFormC({ usuarioId: '', cursoId: '' }); await carregar();
+            setFormC({ usuarioId: '', cursoId: '' });
+            await carregar(); setAbaAtiva('consultar');
         } catch { exibirMsg('danger', 'Erro ao emitir certificado.'); }
     };
 
+    const totalConcluidas = progressos.filter(p => p.concluida).length;
+    const totalCertificados = certificados.length;
+
     return (
-        <div className="container mt-4">
-            <h4 className="mb-4">Controle de Progresso & Certificados</h4>
+        <div className="container-fluid mt-2">
+            <div className="mb-4">
+                <h4 className="mb-0">Progresso & Certificados</h4>
+                <small className="text-muted">Acompanhe o desempenho dos alunos</small>
+            </div>
+
             {mensagem && <div className={`alert alert-${mensagem.tipo} mb-3`}>{mensagem.texto}</div>}
-            <div className="row g-4">
-                <div className="col-12 col-lg-6">
-                    <ProgressoForm formP={formP} formC={formC} usuarios={usuarios} cursos={cursos}
-                        aulas={aulas} onChangeP={setFormP} onChangeC={setFormC}
-                        onMarcar={handleMarcar} onEmitir={handleEmitir} />
+
+            {/* Resumo */}
+            <div className="row g-3 mb-4">
+                <div className="col-6 col-md-3">
+                    <div className="card p-3 text-center">
+                        <div className="fs-3 fw-bold">{progressos.length}</div>
+                        <div className="text-muted small">Registros de progresso</div>
+                    </div>
                 </div>
-                <div className="col-12 col-lg-6">
-                    <ProgressoTable progressos={progressos} certificados={certificados}
+                <div className="col-6 col-md-3">
+                    <div className="card p-3 text-center">
+                        <div className="fs-3 fw-bold">{totalConcluidas}</div>
+                        <div className="text-muted small">Aulas concluídas</div>
+                    </div>
+                </div>
+                <div className="col-6 col-md-3">
+                    <div className="card p-3 text-center">
+                        <div className="fs-3 fw-bold">{totalCertificados}</div>
+                        <div className="text-muted small">Certificados emitidos</div>
+                    </div>
+                </div>
+                <div className="col-6 col-md-3">
+                    <div className="card p-3 text-center">
+                        <div className="fs-3 fw-bold">
+                            {progressos.length > 0 ? `${Math.round((totalConcluidas / progressos.length) * 100)}%` : '0%'}
+                        </div>
+                        <div className="text-muted small">Taxa de conclusão</div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Abas */}
+            <ul className="nav nav-tabs mb-3">
+                {([
+                    { key: 'consultar',   label: 'Consultar Progresso' },
+                    { key: 'marcar',      label: 'Marcar Aula Concluída' },
+                    { key: 'certificado', label: 'Emitir Certificado' },
+                ] as { key: Aba; label: string }[]).map(aba => (
+                    <li className="nav-item" key={aba.key}>
+                        <button
+                            className={`nav-link ${abaAtiva === aba.key ? 'active' : ''}`}
+                            onClick={() => setAbaAtiva(aba.key)}
+                        >
+                            {aba.label}
+                        </button>
+                    </li>
+                ))}
+            </ul>
+
+            <div className="card p-4">
+                {abaAtiva === 'marcar' && (
+                    <div style={{ maxWidth: '480px' }}>
+                        <h6 className="mb-3">Marcar Aula como Concluída</h6>
+                        <ProgressoForm
+                            formP={formP} formC={formC}
+                            usuarios={usuarios} cursos={cursos} aulas={aulas}
+                            onChangeP={setFormP} onChangeC={setFormC}
+                            onMarcar={handleMarcar} onEmitir={handleEmitir}
+                            abaAtiva="marcar"
+                        />
+                    </div>
+                )}
+
+                {abaAtiva === 'certificado' && (
+                    <div style={{ maxWidth: '480px' }}>
+                        <h6 className="mb-3">Emitir Certificado</h6>
+                        <ProgressoForm
+                            formP={formP} formC={formC}
+                            usuarios={usuarios} cursos={cursos} aulas={aulas}
+                            onChangeP={setFormP} onChangeC={setFormC}
+                            onMarcar={handleMarcar} onEmitir={handleEmitir}
+                            abaAtiva="certificado"
+                        />
+                    </div>
+                )}
+
+                {abaAtiva === 'consultar' && (
+                    <ProgressoTable
+                        progressos={progressos} certificados={certificados}
                         usuarios={usuarios} cursos={cursos}
                         filtroU={filtroU} filtroC={filtroC}
-                        onFiltroU={setFiltroU} onFiltroC={setFiltroC} />
-                </div>
+                        onFiltroU={setFiltroU} onFiltroC={setFiltroC}
+                    />
+                )}
             </div>
         </div>
     );
